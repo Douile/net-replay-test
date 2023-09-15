@@ -4,6 +4,7 @@ use std::net::ToSocketAddrs;
 use std::path::PathBuf;
 #[cfg(feature = "impl_node")]
 use std::process::Command;
+use std::process::Stdio;
 
 use crate::error::Error;
 use crate::QueryOptions;
@@ -79,6 +80,7 @@ impl QueryImplementation for NodeImpl {
             .arg("--type")
             .arg(&options.game)
             .arg(host_str)
+            .stderr(Stdio::inherit())
             .output()?;
 
         let value = serde_json::from_slice(&output.stdout)?;
