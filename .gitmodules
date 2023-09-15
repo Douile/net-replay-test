@@ -1,0 +1,3 @@
+[submodule "node-gamedig"]
+	path = node-gamedig
+	url = https://github.com/gamedig/node-gamedig.git
