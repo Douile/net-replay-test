@@ -91,7 +91,6 @@ pub fn replay(
     use std::sync::{Arc, Barrier};
 
     let address = IpAddr::V4(Ipv4Addr::new(127, 0, 0, 50));
-    let bind_address = SocketAddr::new(address, query_replay.server.port);
 
     let mut query_options = query_replay.query.clone();
 
@@ -99,15 +98,7 @@ pub fn replay(
 
     let server_barrier = Arc::clone(&barrier);
     let server_thread = std::thread::spawn(move || {
-        match query_replay.server.protocol {
-            packet::PacketProtocol::Tcp => {
-                server::tcp_server(bind_address, query_replay, server_barrier)
-            }
-            packet::PacketProtocol::Udp => {
-                server::udp_server(bind_address, query_replay, server_barrier)
-            }
-        }
-        .unwrap();
+        server::server(address, query_replay, server_barrier).unwrap();
     });
 
     barrier.wait();

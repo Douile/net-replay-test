@@ -1,5 +1,5 @@
 use crate::options::ServerOptionsError;
-use crate::packet::PacketParseError;
+use crate::packet::{PacketParseError, PacketProtocol};
 
 #[derive(Debug)]
 pub enum Error {
@@ -12,7 +12,11 @@ pub enum Error {
     PacketParse(PacketParseError),
     ServerOptions(ServerOptionsError),
     String(String),
+    #[cfg(feature = "replay")]
+    SendBeforeRecv(PacketProtocol),
 }
+
+pub type EResult<T> = Result<T, Error>;
 
 #[cfg(feature = "capture")]
 impl From<pcap::Error> for Error {
