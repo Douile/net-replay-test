@@ -1,0 +1,67 @@
+[package]
+name = "net-replay-test"
+description = "Capture and replay network packet integration tests for use with gamedig"
+version = "0.1.0"
+edition = "2021"
+authors = [ "Douile <douile@douile.com>" ]
+readme = "README.md"
+license = "MIT"
+rust-version = "1.70.0"
+homepage = "https://github.com/Douile/net-replay-test"
+repository = "https://github.com/Douile/net-replay-test.git"
+categories = [ "network-programming", "development-tools::testing" ]
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[[bin]]
+name = "net-replay-test"
+required-features = [ "cli", "capture", "replay", "serde", "impl_node", "impl_rs" ]
+
+[features]
+impl_rs = [ "dep:gamedig"]
+impl_node = []
+serde = [ "dep:serde" ]
+
+capture = [ "dep:pcap", "dep:pnet_packet" ]
+replay = []
+
+cli = [ "dep:clap", "dep:chrono" ]
+
+default = [ "replay", "serde", "impl_node", "impl_rs" ]
+
+[dependencies]
+# Network capture
+[dependencies.pcap]
+version = "1.1"
+optional = true
+
+[dependencies.pnet_packet]
+version = "0.34"
+optional = true
+
+# Serde
+[dependencies.serde_json]
+version = "1"
+
+[dependencies.serde]
+version = "1"
+features = [ "derive" ]
+optional = true
+
+# Impls
+[dependencies.gamedig]
+git = "https://github.com/gamedig/rust-gamedig.git"
+features = [ "serde" ]
+optional = true
+
+# CLI
+[dependencies.clap]
+version = "4.4"
+features = [ "cargo" ]
+optional = true
+
+[dependencies.chrono]
+version = "0.4"
+default-features = false
+features = [ "alloc", "std", "clock" ]
+optional = true
