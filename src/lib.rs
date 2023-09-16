@@ -130,10 +130,13 @@ pub fn replay(
         server::server(address, query_replay, server_barrier).unwrap();
     });
 
+    query_options.address = address.to_string();
+
     barrier.wait();
 
-    query_options.address = address.to_string();
+    let start_time = std::time::Instant::now();
     let value = implementation.query_server(&query_options)?;
+    let duration = std::time::Instant::now() - start_time;
 
     let _ = server_thread.join();
 
@@ -143,6 +146,7 @@ pub fn replay(
         "Value match={} found={:#?} expected={:#?}",
         values_match, value, query_value
     );
+    println!("Took {:?}", duration);
 
     Ok(values_match)
 }
