@@ -21,6 +21,8 @@ pub mod server;
 pub mod options;
 pub use options::{QueryOptions, QueryReplay};
 
+pub const REPLAY_VERSION: u32 = 1;
+
 #[cfg(feature = "capture")]
 fn create_pcap_capture(
     options: &QueryOptions,
@@ -80,6 +82,7 @@ pub fn capture(
         server: server_options,
         packets,
         value,
+        replay_version: REPLAY_VERSION,
     })
 }
 
@@ -89,6 +92,13 @@ pub fn replay(
     query_replay: QueryReplay,
 ) -> Result<(), Error> {
     use std::sync::{Arc, Barrier};
+
+    if query_replay.replay_version != REPLAY_VERSION {
+        return Err(Error::WrongReplayVersion {
+            found: query_replay.replay_version,
+            required: REPLAY_VERSION,
+        });
+    }
 
     let address = IpAddr::V4(Ipv4Addr::new(127, 0, 0, 50));
 

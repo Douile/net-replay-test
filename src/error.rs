@@ -14,6 +14,10 @@ pub enum Error {
     String(String),
     #[cfg(feature = "replay")]
     SendBeforeRecv(PacketProtocol),
+    WrongReplayVersion {
+        found: u32,
+        required: u32,
+    },
 }
 
 pub type EResult<T> = Result<T, Error>;

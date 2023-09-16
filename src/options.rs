@@ -82,4 +82,5 @@ pub struct QueryReplay {
     pub server: ServerOptions,
     pub packets: Vec<Packet>,
     pub value: serde_json::Value,
+    pub replay_version: u32,
 }
