@@ -61,6 +61,7 @@ impl QueryImplementation for RustImpl {
 pub struct NodeImpl {
     pub node_path: PathBuf,
     pub gamedig_path: PathBuf,
+    pub node_args: Option<Vec<String>>,
 }
 #[cfg(feature = "impl_node")]
 impl Default for NodeImpl {
@@ -68,6 +69,7 @@ impl Default for NodeImpl {
         Self {
             node_path: "node".into(),
             gamedig_path: "./node-gamedig/bin/gamedig.js".into(),
+            node_args: None,
         }
     }
 }
@@ -79,15 +81,22 @@ impl QueryImplementation for NodeImpl {
             host_str.to_mut().push_str(&format!(":{}", port));
         }
 
-        println!("Running {:?} {:?}", self.node_path, self.gamedig_path);
+        let mut command = Command::new(&self.node_path);
+        command.stderr(Stdio::inherit());
 
-        let output = Command::new(&self.node_path)
+        if let Some(node_args) = &self.node_args {
+            command.args(node_args);
+        }
+
+        command
             .arg(&self.gamedig_path)
             .arg("--type")
             .arg(&options.game)
-            .arg(host_str.as_ref())
-            .stderr(Stdio::inherit())
-            .output()?;
+            .arg(host_str.as_ref());
+
+        println!("Running {:?}", command);
+
+        let output = command.output()?;
 
         if !output.status.success() {
             return Err(Error::String(

@@ -22,6 +22,9 @@ impl TryFrom<String> for Mode {
 fn main() {
     let mut command = clap::command!()
         .arg(arg!(-i --implementation <IMPL> "Optional implementation to use"))
+        .arg(arg!(--"node-path" <PATH> "Optional path to node executable"))
+        .arg(arg!(--"node-arg" <ARGS> ... "Optional additional arguments for node"))
+        .arg(arg!(--"node-gamedig-path" <PATH> "Optional path to node-gamedig installation"))
         .subcommand(
             Command::new("capture")
                 .about("Capture a new test (requires cap_net_raw,cap_net_admin=eip)")
@@ -42,7 +45,19 @@ fn main() {
     let implementation: Box<dyn QueryImplementation> =
         if let Some(impl_name) = matches.get_one::<String>("implementation") {
             match impl_name.as_str() {
-                "node" => Box::new(NodeImpl::default()),
+                "node" => {
+                    let mut node = NodeImpl::default();
+                    if let Some(node_path) = matches.get_one::<String>("node-path") {
+                        node.node_path = node_path.into();
+                    }
+                    if let Some(gamedig_path) = matches.get_one::<String>("node-gamedig-path") {
+                        node.gamedig_path = gamedig_path.into();
+                    }
+                    if let Some(node_args) = matches.get_many::<String>("node-arg") {
+                        node.node_args = Some(node_args.cloned().collect());
+                    }
+                    Box::new(node)
+                }
                 "rust" => Box::new(RustImpl::default()),
                 _ => panic!("No such impl {:?}", impl_name),
             }
