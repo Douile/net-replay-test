@@ -83,6 +83,12 @@ impl QueryImplementation for NodeImpl {
             .stderr(Stdio::inherit())
             .output()?;
 
+        if !output.status.success() {
+            return Err(Error::String(
+                String::from_utf8_lossy(&output.stdout).to_string(),
+            ));
+        }
+
         let value: serde_json::Value = serde_json::from_slice(&output.stdout)?;
 
         Ok(value.try_into()?)

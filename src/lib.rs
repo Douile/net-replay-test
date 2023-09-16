@@ -60,10 +60,9 @@ pub fn capture(
 
     let mut save_file = capture.savefile("test.pcap")?;
 
-    let value = implementation.query_server(&options)?;
+    let value = implementation.query_server(&options);
 
-    println!("{:#?}", value);
-    println!("{:#?}", capture.stats());
+    println!("Packets captured {:#?}", capture.stats());
 
     let mut capture = capture.setnonblock()?;
 
@@ -75,6 +74,8 @@ pub fn capture(
         packets.push(pkt);
     }
 
+    let value = value?;
+    println!("{:#?}", value);
     println!("{:?}", packets);
 
     let server_options = options::ServerOptions::try_from(&packets[..])?;
