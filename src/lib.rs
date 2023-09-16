@@ -93,7 +93,7 @@ pub fn capture(
 pub fn replay(
     implementation: Box<dyn QueryImplementation>,
     query_replay: QueryReplay,
-) -> Result<(), Error> {
+) -> Result<bool, Error> {
     use std::sync::{Arc, Barrier};
 
     if query_replay.replay_version != REPLAY_VERSION {
@@ -106,6 +106,7 @@ pub fn replay(
     let address = IpAddr::V4(Ipv4Addr::new(127, 0, 0, 50));
 
     let mut query_options = query_replay.query.clone();
+    let query_value = query_replay.value.clone();
 
     let barrier = Arc::new(Barrier::new(2));
 
@@ -119,11 +120,14 @@ pub fn replay(
     query_options.address = address.to_string();
     let value = implementation.query_server(&query_options)?;
 
-    println!("Value {:#?}", value);
-
     let _ = server_thread.join();
 
-    // TODO: Compare values
+    let values_match = value == query_value;
 
-    Ok(())
+    println!(
+        "Value match={} found={:#?} expected={:#?}",
+        values_match, value, query_value
+    );
+
+    Ok(values_match)
 }

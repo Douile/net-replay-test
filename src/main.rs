@@ -96,5 +96,10 @@ fn do_replay(i: Box<dyn QueryImplementation>, matches: &clap::ArgMatches) {
 
     let query_replay: QueryReplay = serde_json::from_reader(file).expect("Invalid replay");
 
-    replay(i, query_replay).unwrap();
+    let result = replay(i, query_replay).unwrap();
+
+    if !result {
+        // If result didn't match make sure to error
+        panic!("Results didn't match");
+    }
 }
