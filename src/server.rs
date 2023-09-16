@@ -100,11 +100,13 @@ fn handle_udp_receive(
 
 fn handle_tcp_send(packet: &Packet, tcp_stream: &OnceCell<TcpStream>) -> EResult<HandleState> {
     if let Some(mut stream) = tcp_stream.get() {
-        let _size = stream.write(&packet.data[..])?;
+        let size = stream.write(&packet.data[..])?;
 
-        // TODO: Check all sent
-
-        Ok(HandleState::Complete)
+        Ok(if size < packet.data.len() {
+            HandleState::Incomplete
+        } else {
+            HandleState::Complete
+        })
     } else {
         Err(Error::SendBeforeRecv(packet.protocol.clone()))
     }
@@ -116,11 +118,13 @@ fn handle_udp_send(
     udp_socket: &UdpSocket,
 ) -> EResult<HandleState> {
     if let Some(client_addr) = udp_client_addr.get() {
-        let _size = udp_socket.send_to(&packet.data[..], client_addr)?;
+        let size = udp_socket.send_to(&packet.data[..], client_addr)?;
 
-        // TODO: Check all sent
-
-        Ok(HandleState::Complete)
+        Ok(if size < packet.data.len() {
+            HandleState::Incomplete
+        } else {
+            HandleState::Complete
+        })
     } else {
         Err(Error::SendBeforeRecv(packet.protocol.clone()))
     }
