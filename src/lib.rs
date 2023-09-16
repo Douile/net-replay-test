@@ -50,6 +50,9 @@ fn create_pcap_capture(
     Ok((addresses, capture))
 }
 
+/// Capture a query using the given implementation, device name can be used to specify which
+/// network device to capture traffic on. To capture traffic this function requires elevated system
+/// privileges.
 #[cfg(feature = "capture")]
 pub fn capture(
     implementation: Box<dyn QueryImplementation>,
@@ -89,6 +92,8 @@ pub fn capture(
     })
 }
 
+/// Replay a saved query using a given implementation, return whether the output value (if
+/// successful) matches
 #[cfg(feature = "replay")]
 pub fn replay(
     implementation: Box<dyn QueryImplementation>,
