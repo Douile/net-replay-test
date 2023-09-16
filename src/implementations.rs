@@ -20,7 +20,12 @@ pub struct RustImpl(gamedig::protocols::ExtraRequestSettings);
 #[cfg(feature = "impl_rs")]
 impl Default for RustImpl {
     fn default() -> Self {
-        Self(gamedig::protocols::ExtraRequestSettings::default().set_check_app_id(false))
+        Self(
+            gamedig::protocols::ExtraRequestSettings::default()
+                .set_check_app_id(false)
+                .set_gather_players(false)
+                .set_gather_rules(false),
+        )
     }
 }
 #[cfg(feature = "impl_rs")]
