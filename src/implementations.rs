@@ -7,10 +7,11 @@ use std::process::Command;
 use std::process::Stdio;
 
 use crate::error::Error;
+use crate::value::CommonValue;
 use crate::QueryOptions;
 
 pub trait QueryImplementation {
-    fn query_server(&self, options: &QueryOptions) -> Result<serde_json::value::Value, Error>;
+    fn query_server(&self, options: &QueryOptions) -> Result<CommonValue, Error>;
 }
 
 #[cfg(feature = "impl_rs")]
@@ -24,7 +25,7 @@ impl Default for RustImpl {
 }
 #[cfg(feature = "impl_rs")]
 impl QueryImplementation for RustImpl {
-    fn query_server(&self, options: &QueryOptions) -> Result<serde_json::value::Value, Error> {
+    fn query_server(&self, options: &QueryOptions) -> Result<CommonValue, Error> {
         let game = gamedig::GAMES
             .get(&options.game)
             .ok_or(Error::String("Unknown game".to_string()))?;
@@ -43,10 +44,9 @@ impl QueryImplementation for RustImpl {
             options.port,
             None,
             Some(self.0.clone().set_hostname(options.address.clone())),
-        )
-        .unwrap();
+        )?;
 
-        Ok(serde_json::json!(output.as_json()))
+        Ok(output.as_json().into())
     }
 }
 
@@ -67,7 +67,7 @@ impl Default for NodeImpl {
 }
 #[cfg(feature = "impl_node")]
 impl QueryImplementation for NodeImpl {
-    fn query_server(&self, options: &QueryOptions) -> Result<serde_json::value::Value, Error> {
+    fn query_server(&self, options: &QueryOptions) -> Result<CommonValue, Error> {
         let mut host_str: String = format!("{}", options.address);
         if let Some(port) = options.port {
             host_str.push_str(&format!(":{}", port));
@@ -83,9 +83,9 @@ impl QueryImplementation for NodeImpl {
             .stderr(Stdio::inherit())
             .output()?;
 
-        let value = serde_json::from_slice(&output.stdout)?;
+        let value: serde_json::Value = serde_json::from_slice(&output.stdout)?;
 
-        Ok(value)
+        Ok(value.try_into()?)
     }
 }
 

@@ -1,6 +1,7 @@
 use std::collections::HashSet;
 
 use crate::packet::{Packet, PacketDirection, PacketProtocol};
+use crate::value::CommonValue;
 
 #[derive(Debug, Clone)]
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
@@ -81,6 +82,6 @@ pub struct QueryReplay {
     pub query: QueryOptions,
     pub server: ServerOptions,
     pub packets: Vec<Packet>,
-    pub value: serde_json::Value,
+    pub value: CommonValue,
     pub replay_version: u32,
 }

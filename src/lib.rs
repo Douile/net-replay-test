@@ -21,6 +21,8 @@ pub mod server;
 pub mod options;
 pub use options::{QueryOptions, QueryReplay};
 
+pub mod value;
+
 pub const REPLAY_VERSION: u32 = 1;
 
 #[cfg(feature = "capture")]

@@ -14,6 +14,8 @@ pub enum Error {
     String(String),
     #[cfg(feature = "replay")]
     SendBeforeRecv(PacketProtocol),
+    #[cfg(feature = "impl_rs")]
+    Rust(gamedig::GDError),
     WrongReplayVersion {
         found: u32,
         required: u32,
@@ -50,5 +52,12 @@ impl From<PacketParseError> for Error {
 impl From<ServerOptionsError> for Error {
     fn from(value: ServerOptionsError) -> Self {
         Error::ServerOptions(value)
+    }
+}
+
+#[cfg(feature = "impl_rs")]
+impl From<gamedig::GDError> for Error {
+    fn from(value: gamedig::GDError) -> Self {
+        Error::Rust(value)
     }
 }
