@@ -1,10 +1,11 @@
+#[cfg(feature = "impl_node")]
+use std::borrow::Cow;
 #[cfg(feature = "impl_rs")]
 use std::net::ToSocketAddrs;
 #[cfg(feature = "impl_node")]
 use std::path::PathBuf;
 #[cfg(feature = "impl_node")]
-use std::process::Command;
-use std::process::Stdio;
+use std::process::{Command, Stdio};
 
 use crate::error::Error;
 use crate::value::CommonValue;
@@ -44,7 +45,7 @@ impl QueryImplementation for RustImpl {
             .ip();
 
         let output = gamedig::query_with_timeout_and_extra_settings(
-            &game,
+            game,
             &ip,
             options.port,
             None,
@@ -73,9 +74,9 @@ impl Default for NodeImpl {
 #[cfg(feature = "impl_node")]
 impl QueryImplementation for NodeImpl {
     fn query_server(&self, options: &QueryOptions) -> Result<CommonValue, Error> {
-        let mut host_str: String = format!("{}", options.address);
+        let mut host_str = Cow::from(&options.address);
         if let Some(port) = options.port {
-            host_str.push_str(&format!(":{}", port));
+            host_str.to_mut().push_str(&format!(":{}", port));
         }
 
         println!("Running {:?} {:?}", self.node_path, self.gamedig_path);
@@ -84,7 +85,7 @@ impl QueryImplementation for NodeImpl {
             .arg(&self.gamedig_path)
             .arg("--type")
             .arg(&options.game)
-            .arg(host_str)
+            .arg(host_str.as_ref())
             .stderr(Stdio::inherit())
             .output()?;
 
@@ -96,7 +97,7 @@ impl QueryImplementation for NodeImpl {
 
         let value: serde_json::Value = serde_json::from_slice(&output.stdout)?;
 
-        Ok(value.try_into()?)
+        value.try_into()
     }
 }
 

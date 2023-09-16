@@ -1,5 +1,5 @@
 #[cfg(feature = "replay")]
-use std::net::{IpAddr, Ipv4Addr, SocketAddr};
+use std::net::{IpAddr, Ipv4Addr};
 
 #[cfg(feature = "capture")]
 use std::path::Path;

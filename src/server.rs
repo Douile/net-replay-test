@@ -1,4 +1,4 @@
-use std::cell::{Cell, OnceCell};
+use std::cell::OnceCell;
 use std::io::{Read, Write};
 use std::net::{IpAddr, SocketAddr, TcpListener, TcpStream, UdpSocket};
 use std::sync::{Arc, Barrier};
@@ -65,13 +65,13 @@ fn handle_tcp_receive(
     tcp_listener: &TcpListener,
 ) -> EResult<HandleState> {
     let state = if let Some(mut stream) = tcp_stream.get() {
-        let size = stream.read(buf)?;
+        let _size = stream.read(buf)?;
         // TODO: Compare data
         HandleState::Complete
     } else {
-        let (mut stream, address) = tcp_listener.accept()?;
+        let (mut stream, _address) = tcp_listener.accept()?;
 
-        let size = stream.read(buf)?;
+        let _size = stream.read(buf)?;
         // TODO: Compare data
 
         tcp_stream.set(stream).unwrap();
@@ -87,7 +87,7 @@ fn handle_udp_receive(
     udp_client_addr: &OnceCell<SocketAddr>,
     udp_socket: &UdpSocket,
 ) -> EResult<HandleState> {
-    let (size, client_addr) = udp_socket.recv_from(buf)?;
+    let (_size, client_addr) = udp_socket.recv_from(buf)?;
 
     if udp_client_addr.get().is_none() {
         udp_client_addr.set(client_addr).unwrap();
@@ -100,7 +100,7 @@ fn handle_udp_receive(
 
 fn handle_tcp_send(packet: &Packet, tcp_stream: &OnceCell<TcpStream>) -> EResult<HandleState> {
     if let Some(mut stream) = tcp_stream.get() {
-        let size = stream.write(&packet.data[..])?;
+        let _size = stream.write(&packet.data[..])?;
 
         // TODO: Check all sent
 
@@ -116,7 +116,7 @@ fn handle_udp_send(
     udp_socket: &UdpSocket,
 ) -> EResult<HandleState> {
     if let Some(client_addr) = udp_client_addr.get() {
-        let size = udp_socket.send_to(&packet.data[..], client_addr)?;
+        let _size = udp_socket.send_to(&packet.data[..], client_addr)?;
 
         // TODO: Check all sent
 
