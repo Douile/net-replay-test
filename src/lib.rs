@@ -2,6 +2,9 @@
 use std::net::{IpAddr, Ipv4Addr, SocketAddr};
 
 #[cfg(feature = "capture")]
+use std::path::Path;
+
+#[cfg(feature = "capture")]
 use pcap::{Capture, Device};
 
 pub mod error;
@@ -58,10 +61,15 @@ pub fn capture(
     implementation: Box<dyn QueryImplementation>,
     options: QueryOptions,
     device_name: Option<&str>,
+    pcap_file: Option<impl AsRef<Path>>,
 ) -> Result<QueryReplay, Error> {
     let (addresses, mut capture) = create_pcap_capture(&options, device_name)?;
 
-    let mut save_file = capture.savefile("test.pcap")?;
+    let mut save_file = if let Some(pcap_file) = pcap_file {
+        Some(capture.savefile(pcap_file)?)
+    } else {
+        None
+    };
 
     let value = implementation.query_server(&options);
 
@@ -71,7 +79,9 @@ pub fn capture(
 
     let mut packets = Vec::new();
     while let Ok(packet) = capture.next_packet() {
-        save_file.write(&packet); // Write to save file as backup
+        if let Some(ref mut save_file) = save_file {
+            save_file.write(&packet); // Write to save file as backup
+        }
 
         let pkt = Packet::try_parse(packet.data, &addresses)?;
         packets.push(pkt);

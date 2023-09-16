@@ -28,7 +28,8 @@ fn main() {
                 .arg(arg!(<game> "Name of game (to query)"))
                 .arg(arg!(<address> "Hostname of server (to query)"))
                 .arg(arg!([port] "Optional port (to query)").value_parser(value_parser!(u16)))
-                .arg(arg!(-d --device <device> "Device to capture on")),
+                .arg(arg!(-d --device <device> "Device to capture on"))
+                .arg(arg!(-c --capture "Save captured packets to a pcap file")),
         )
         .subcommand(
             Command::new("replay")
@@ -52,7 +53,7 @@ fn main() {
     if let Some(matches) = matches.subcommand_matches("capture") {
         do_capture(implementation, matches);
     } else if let Some(matches) = matches.subcommand_matches("replay") {
-        do_replay(implementation, matches)
+        do_replay(implementation, matches);
     } else {
         let _ = command.print_help().unwrap();
     }
@@ -63,6 +64,7 @@ fn do_capture(i: Box<dyn QueryImplementation>, matches: &clap::ArgMatches) {
     let address = matches.get_one::<String>("address").unwrap();
     let port = matches.get_one::<u16>("port");
     let device = matches.get_one::<String>("device");
+    let should_save_pcap = matches.get_flag("capture");
 
     let opts = QueryOptions {
         game: game.to_string(),
@@ -71,8 +73,13 @@ fn do_capture(i: Box<dyn QueryImplementation>, matches: &clap::ArgMatches) {
     };
 
     let replay_name = opts.as_file_name();
+    let pcap_file = if should_save_pcap {
+        Some(format!("{}.pcap", replay_name))
+    } else {
+        None
+    };
 
-    let r = capture(i, opts, device.map(|x| x.as_str()));
+    let r = capture(i, opts, device.map(|x| x.as_str()), pcap_file);
     println!("{:#?}", r);
 
     let r = r.unwrap();
