@@ -52,6 +52,9 @@ impl QueryImplementation for RustImpl {
             Some(self.0.clone().set_hostname(options.address.clone())),
         )?;
 
+        #[cfg(feature = "print_raw")]
+        println!("{:#?}", output.as_json());
+
         Ok(output.as_json().into())
     }
 }
@@ -105,6 +108,9 @@ impl QueryImplementation for NodeImpl {
         }
 
         let value: serde_json::Value = serde_json::from_slice(&output.stdout)?;
+
+        #[cfg(feature = "print_raw")]
+        println!("{:#?}", value);
 
         value.try_into()
     }

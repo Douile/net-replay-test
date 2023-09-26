@@ -27,6 +27,8 @@ replay = []
 
 cli = [ "dep:clap", "dep:chrono" ]
 
+print_raw = []
+
 default = [ "replay", "serde", "impl_node", "impl_rs" ]
 
 [dependencies]
