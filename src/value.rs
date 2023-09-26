@@ -43,7 +43,7 @@ impl TryFrom<serde_json::Value> for CommonValue {
                 .and_then(|v| v.as_str())
                 .map(|v| v.to_string()),
             map: obj
-                .get("name")
+                .get("map")
                 .and_then(|v| v.as_str())
                 .map(|v| v.to_string()),
             has_password: obj.get("password").and_then(|v| v.as_bool()),
