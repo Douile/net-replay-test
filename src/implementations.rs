@@ -6,6 +6,7 @@ use std::net::ToSocketAddrs;
 use std::path::PathBuf;
 #[cfg(feature = "impl_node")]
 use std::process::{Command, Stdio};
+use std::time::Duration;
 
 use crate::error::Error;
 use crate::value::CommonValue;
@@ -44,11 +45,17 @@ impl QueryImplementation for RustImpl {
             ))?
             .ip();
 
+        let timeout_settings = gamedig::protocols::types::TimeoutSettings::new(
+            Some(Duration::from_secs(5)),
+            Some(Duration::from_secs(5)),
+            3,
+        )?;
+
         let output = gamedig::query_with_timeout_and_extra_settings(
             game,
             &ip,
             options.port,
-            None,
+            Some(timeout_settings),
             Some(self.0.clone().set_hostname(options.address.clone())),
         )?;
 
