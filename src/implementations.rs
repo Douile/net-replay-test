@@ -25,7 +25,7 @@ impl Default for RustImpl {
         Self(
             gamedig::protocols::ExtraRequestSettings::default()
                 .set_check_app_id(false)
-                .set_gather_players(false)
+                .set_gather_players(true)
                 .set_gather_rules(false),
         )
     }

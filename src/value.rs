@@ -1,3 +1,5 @@
+use std::collections::HashSet;
+
 use crate::Error;
 
 /// Common value type based on output from both node and rust
@@ -9,6 +11,7 @@ pub struct CommonValue {
     has_password: Option<bool>,
     players_online: Option<u64>,
     players_maximum: Option<u64>,
+    player_names: HashSet<String>,
 }
 
 #[cfg(feature = "impl_rs")]
@@ -20,6 +23,15 @@ impl From<gamedig::protocols::types::CommonResponseJson<'_>> for CommonValue {
             has_password: value.has_password,
             players_online: Some(value.players_online.into()),
             players_maximum: Some(value.players_maximum.into()),
+            player_names: value
+                .players
+                .map(|players| {
+                    players
+                        .into_iter()
+                        .map(|player| player.name.to_string())
+                        .collect()
+                })
+                .unwrap_or(HashSet::new()),
         }
     }
 }
@@ -55,6 +67,22 @@ impl TryFrom<serde_json::Value> for CommonValue {
                 .get("maxplayers")
                 .and_then(|v| v.as_number())
                 .and_then(|v| v.as_u64()),
+            player_names: obj
+                .get("players")
+                .and_then(|players| players.as_array())
+                .map(|players| {
+                    players
+                        .iter()
+                        .filter_map(|player| {
+                            player
+                                .as_object()
+                                .and_then(|player| player.get("name"))
+                                .and_then(|name| name.as_str())
+                                .map(|name| name.to_string())
+                        })
+                        .collect()
+                })
+                .unwrap_or(HashSet::new()),
         })
     }
 }
