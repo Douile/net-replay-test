@@ -19,7 +19,7 @@ pub mod packet;
 use packet::Packet;
 
 #[cfg(feature = "replay")]
-pub mod server;
+mod server;
 
 pub mod options;
 pub use options::{QueryOptions, QueryReplay};
