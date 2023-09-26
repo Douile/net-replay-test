@@ -37,8 +37,7 @@ fn create_pcap_capture(
         let devices = Device::list()?;
         devices
             .into_iter()
-            .filter(|d| d.name == device_name)
-            .next()
+            .find(|d| d.name == device_name)
             .ok_or(Error::NoCaptureDevice)?
     } else {
         Device::lookup()?.ok_or(Error::NoCaptureDevice)?
