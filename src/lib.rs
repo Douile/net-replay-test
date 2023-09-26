@@ -137,7 +137,10 @@ pub fn replay(
     let value = implementation.query_server(&query_options)?;
     let duration = std::time::Instant::now() - start_time;
 
-    let _ = server_thread.join();
+    if !server_thread.is_finished() {
+        println!("WARNING: didn't consume all packets, leaking thread");
+        // FIXME: This leaks a thread, we should clean this up
+    }
 
     let values_match = value == query_value;
 
