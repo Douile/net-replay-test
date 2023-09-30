@@ -31,6 +31,7 @@ fn main() {
                 .arg(arg!(<game> "Name of game (to query)"))
                 .arg(arg!(<address> "Hostname of server (to query)"))
                 .arg(arg!([port] "Optional port (to query)").value_parser(value_parser!(u16)))
+                .arg(arg!(--"censor-player-names" "Censor captured player names (naively)"))
                 .arg(arg!(-d --device <device> "Device to capture on"))
                 .arg(arg!(-c --capture "Save captured packets to a pcap file")),
         )
@@ -80,6 +81,7 @@ fn do_capture(i: Box<dyn QueryImplementation>, matches: &clap::ArgMatches) {
     let port = matches.get_one::<u16>("port");
     let device = matches.get_one::<String>("device");
     let should_save_pcap = matches.get_flag("capture");
+    let censor_player_names = matches.get_flag("censor-player-names");
 
     let opts = QueryOptions {
         game: game.to_string(),
@@ -94,7 +96,13 @@ fn do_capture(i: Box<dyn QueryImplementation>, matches: &clap::ArgMatches) {
         None
     };
 
-    let r = capture(i, opts, device.map(|x| x.as_str()), pcap_file);
+    let r = capture(
+        i,
+        opts,
+        device.map(|x| x.as_str()),
+        pcap_file,
+        censor_player_names,
+    );
     println!("{:#?}", r);
 
     let r = r.unwrap();

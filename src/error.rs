@@ -20,6 +20,8 @@ pub enum Error {
         found: u32,
         required: u32,
     },
+    #[cfg(feature = "filter")]
+    Filter(crate::packet_filter::FilterError),
 }
 
 pub type EResult<T> = Result<T, Error>;
@@ -59,5 +61,12 @@ impl From<ServerOptionsError> for Error {
 impl From<gamedig::GDError> for Error {
     fn from(value: gamedig::GDError) -> Self {
         Error::Rust(value)
+    }
+}
+
+#[cfg(feature = "filter")]
+impl From<crate::packet_filter::FilterError> for Error {
+    fn from(value: crate::packet_filter::FilterError) -> Self {
+        Error::Filter(value)
     }
 }

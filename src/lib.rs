@@ -10,6 +10,9 @@ use pcap::{Capture, Device};
 pub mod error;
 pub use error::Error;
 
+#[cfg(feature = "filter")]
+pub mod packet_filter;
+
 pub mod implementations;
 #[cfg(any(feature = "capture", feature = "replay"))]
 use implementations::QueryImplementation;
@@ -61,6 +64,7 @@ pub fn capture(
     options: QueryOptions,
     device_name: Option<&str>,
     pcap_file: Option<impl AsRef<Path>>,
+    censor_player_names: bool,
 ) -> Result<QueryReplay, Error> {
     let (addresses, mut capture) = create_pcap_capture(&options, device_name)?;
 
@@ -92,13 +96,19 @@ pub fn capture(
 
     let server_options = options::ServerOptions::try_from(&packets[..])?;
 
-    Ok(QueryReplay {
+    let mut replay = QueryReplay {
         query: options,
         server: server_options,
         packets,
         value,
         replay_version: REPLAY_VERSION,
-    })
+    };
+
+    if censor_player_names {
+        packet_filter::packet_name_replace(&mut replay)?;
+    }
+
+    Ok(replay)
 }
 
 /// Replay a saved query using a given implementation, return whether the output value (if
@@ -144,10 +154,10 @@ pub fn replay(
 
     let values_match = value == query_value;
 
-    println!(
-        "Value match={} found={:#?} expected={:#?}",
-        values_match, value, query_value
-    );
+    if !values_match {
+        value.print_difference(&query_value);
+    }
+
     println!("Took {:?}", duration);
 
     Ok(values_match)

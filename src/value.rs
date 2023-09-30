@@ -6,12 +6,45 @@ use crate::Error;
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 pub struct CommonValue {
-    name: Option<String>,
-    map: Option<String>,
-    has_password: Option<bool>,
-    players_online: Option<u64>,
-    players_maximum: Option<u64>,
-    player_names: HashSet<String>,
+    pub name: Option<String>,
+    pub map: Option<String>,
+    pub has_password: Option<bool>,
+    pub players_online: Option<u64>,
+    pub players_maximum: Option<u64>,
+    pub player_names: HashSet<String>,
+}
+
+macro_rules! print_diff {
+    ($name: expr, $self: expr, $other: expr) => {
+        if $self != $other {
+            println!(
+                "  \"{}\" => expected({:?}) value({:?})",
+                $name, $self, $other
+            );
+        }
+    };
+}
+
+impl CommonValue {
+    pub fn print_difference(&self, other: &CommonValue) {
+        println!("CommonValue diff {{");
+
+        print_diff!("name", self.name, other.name);
+        print_diff!("map", self.map, other.map);
+        print_diff!("has_password", self.has_password, other.has_password);
+        print_diff!("players_online", self.players_online, other.players_online);
+        print_diff!(
+            "players_maximum",
+            self.players_maximum,
+            other.players_maximum
+        );
+
+        for diff in self.player_names.difference(&other.player_names) {
+            println!("  {:?}", diff);
+        }
+
+        println!("}}");
+    }
 }
 
 #[cfg(feature = "impl_rs")]

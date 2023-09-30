@@ -22,7 +22,8 @@ impl_rs = [ "dep:gamedig"]
 impl_node = []
 serde = [ "dep:serde" ]
 
-capture = [ "dep:pcap", "dep:pnet_packet" ]
+capture = [ "dep:pcap", "dep:pnet_packet", "filter" ]
+filter = []
 replay = []
 
 cli = [ "dep:clap", "dep:chrono" ]
