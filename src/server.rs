@@ -32,10 +32,10 @@ pub fn server(address: IpAddr, query_replay: QueryReplay, ready: ReadyBarrier) -
 
         let state = match (&packet.direction, &packet.protocol) {
             (PacketDirection::ToServer, PacketProtocol::Tcp) => {
-                handle_tcp_receive(&mut buf, &tcp_stream, &tcp_listener)
+                handle_tcp_receive(&mut buf, &tcp_stream, &tcp_listener, packet)
             }
             (PacketDirection::ToServer, PacketProtocol::Udp) => {
-                handle_udp_receive(&mut buf, &udp_client_addr, &udp_listener)
+                handle_udp_receive(&mut buf, &udp_client_addr, &udp_listener, packet)
             }
             (PacketDirection::FromServer, PacketProtocol::Tcp) => {
                 handle_tcp_send(packet, &tcp_stream)
@@ -63,6 +63,7 @@ fn handle_tcp_receive(
     buf: &mut [u8],
     tcp_stream: &OnceCell<TcpStream>,
     tcp_listener: &TcpListener,
+    packet: &Packet,
 ) -> EResult<HandleState> {
     let state = if let Some(mut stream) = tcp_stream.get() {
         let _size = stream.read(buf)?;
@@ -71,8 +72,12 @@ fn handle_tcp_receive(
     } else {
         let (mut stream, _address) = tcp_listener.accept()?;
 
-        let _size = stream.read(buf)?;
+        let size = stream.read(buf)?;
         // TODO: Compare data
+
+        if buf[..size].ne(&packet.data) {
+            println!("Received TCP packet that didn't match");
+        }
 
         tcp_stream.set(stream).unwrap();
 
@@ -86,14 +91,18 @@ fn handle_udp_receive(
     buf: &mut [u8],
     udp_client_addr: &OnceCell<SocketAddr>,
     udp_socket: &UdpSocket,
+    packet: &Packet,
 ) -> EResult<HandleState> {
-    let (_size, client_addr) = udp_socket.recv_from(buf)?;
+    let (size, client_addr) = udp_socket.recv_from(buf)?;
 
     if udp_client_addr.get().is_none() {
         udp_client_addr.set(client_addr).unwrap();
     }
 
     // TODO: Compare data
+    if buf[..size].ne(&packet.data) {
+        println!("Received UDP packet that didn't match");
+    }
 
     Ok(HandleState::Complete)
 }
