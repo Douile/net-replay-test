@@ -48,7 +48,7 @@ impl QueryImplementation for RustImpl {
         let timeout_settings = gamedig::protocols::types::TimeoutSettings::new(
             Some(Duration::from_secs(5)),
             Some(Duration::from_secs(5)),
-            3,
+            1,
         )?;
 
         let output = gamedig::query_with_timeout_and_extra_settings(
