@@ -155,7 +155,7 @@ pub fn replay(
     let values_match = value == query_value;
 
     if !values_match {
-        value.print_difference(&query_value);
+        query_value.print_difference(&value);
     }
 
     println!("Took {:?}", duration);
