@@ -1,5 +1,9 @@
+use std::fmt::Formatter;
+
 use crate::options::ServerOptionsError;
 use crate::packet::{PacketParseError, PacketProtocol};
+
+pub type GenericError = Box<dyn std::error::Error + 'static>;
 
 #[derive(Debug)]
 pub enum Error {
@@ -22,6 +26,41 @@ pub enum Error {
     },
     #[cfg(feature = "filter")]
     Filter(crate::packet_filter::FilterError),
+    Generic(GenericError),
+}
+
+impl std::fmt::Display for Error {
+    fn fmt(&self, f: &mut Formatter) -> Result<(), std::fmt::Error> {
+        writeln!(f, "{:#?}", self)
+    }
+}
+
+impl std::error::Error for Error {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        match self {
+            #[cfg(feature = "capture")]
+            Self::NoCaptureDevice => None,
+            Self::WrongReplayVersion {
+                found: _,
+                required: _,
+            } => None,
+            Self::PacketParse(_) => None,
+            Self::ServerOptions(_) => None,
+            #[cfg(feature = "replay")]
+            Self::SendBeforeRecv(_) => None,
+            #[cfg(feature = "filter")]
+            Self::Filter(_) => None,
+            Self::String(_) => None,
+
+            #[cfg(feature = "capture")]
+            Self::Pcap(source) => Some(source),
+            Self::IO(source) => Some(source),
+            Self::Json(source) => Some(source),
+            Self::Generic(source) => Some(source.as_ref()),
+            #[cfg(feature = "impl_rs")]
+            Self::Rust(source) => Some(source),
+        }
+    }
 }
 
 pub type EResult<T> = Result<T, Error>;
@@ -68,5 +107,11 @@ impl From<gamedig::GDError> for Error {
 impl From<crate::packet_filter::FilterError> for Error {
     fn from(value: crate::packet_filter::FilterError) -> Self {
         Error::Filter(value)
+    }
+}
+
+impl From<GenericError> for Error {
+    fn from(value: GenericError) -> Self {
+        Error::Generic(value)
     }
 }
