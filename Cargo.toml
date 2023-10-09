@@ -18,7 +18,7 @@ name = "net-replay-test"
 required-features = [ "cli", "capture", "replay", "serde", "impl_node", "impl_rs" ]
 
 [features]
-impl_rs = [ "dep:gamedig"]
+impl_rs = [ "dep:gamedig" ]
 impl_node = []
 serde = [ "dep:serde" ]
 

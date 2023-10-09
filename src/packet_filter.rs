@@ -32,7 +32,7 @@ pub fn raw_replace(
     to_replace: &[u8],
     replacement: &[u8],
 ) -> Result<usize, FilterError> {
-    if to_replace.len() == 0 {
+    if to_replace.is_empty() {
         return Err(FilterError::EmptyReplace);
     }
     if to_replace.len() != replacement.len() {

@@ -59,11 +59,11 @@ fn main() {
                     }
                     Box::new(node)
                 }
-                "rust" => Box::new(RustImpl::default()),
+                "rust" => Box::<RustImpl>::default(),
                 _ => panic!("No such impl {:?}", impl_name),
             }
         } else {
-            Box::new(NodeImpl::default())
+            Box::<NodeImpl>::default()
         };
 
     if let Some(matches) = matches.subcommand_matches("capture") {
@@ -71,7 +71,7 @@ fn main() {
     } else if let Some(matches) = matches.subcommand_matches("replay") {
         do_replay(implementation, matches);
     } else {
-        let _ = command.print_help().unwrap();
+        command.print_help().unwrap();
     }
 }
 

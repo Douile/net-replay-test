@@ -64,7 +64,7 @@ impl From<gamedig::protocols::types::CommonResponseJson<'_>> for CommonValue {
                         .map(|player| player.name.to_string())
                         .collect()
                 })
-                .unwrap_or(HashSet::new()),
+                .unwrap_or_default(),
         }
     }
 }
